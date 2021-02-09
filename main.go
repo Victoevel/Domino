@@ -24,7 +24,7 @@ func Init() *Game {
 
 	for {
 		fmt.Printf("Ingresar numero de Jugadores (Entre 2 y 4): ")
-		fmt.Scan(&n)
+		fmt.Scanln(&n)
 		if n > 4 || n < 2 {
 			fmt.Printf("Demasiados o muy pocos jugadores!\n\n")
 			continue
@@ -113,54 +113,63 @@ func wrap(min, max, n int) int {
 	}
 }
 
+func gameLoop(game *Game) {
+	var cmd string
+	var num int = -1
+
+	flag := true
+	for flag {
+		fmt.Printf("\n\nEs turno del jugador numero %d!\n", game.firstTurn)
+		fmt.Printf("Ingrese su comando (Escribir 'ayuda' para ver lista de comandos): ")
+		fmt.Scanln(&cmd, &num)
+		switch cmd {
+		case "ayuda":
+			fmt.Printf(`
+Lista de Comandos:
+"ayuda"     : Muestra los comandos del juego.
+"mano"      : Muestra la mano actual.
+"tablero"   : Muestra el estado actual del tablero.
+"pasar"     : Si no tienes nada que jugar, puedes  robar una ficha y pasar tu turno.
+"jugar [i]" : Puedes intentar jugar una ficha de tu mano. El juego determinara donde poner la ficha automaticamente.
+"salir"     : Salir del juego.
+`)
+		case "mano":
+			for _, v := range game.players[game.firstTurn].Hand {
+				fmt.Printf("\t%v", *v)
+			}
+			fmt.Printf("\n")
+		case "tablero":
+			fmt.Printf("Funcionamiento Pendiente\n")
+		case "pasar":
+			var newFicha *Domino.Domino
+			if !(len(game.shufflePile) == 0) {
+				newFicha, game.shufflePile = Tree.Pop(game.shufflePile)
+				game.players[game.firstTurn].Hand = append(game.players[game.firstTurn].Hand, newFicha)
+				fmt.Printf("Robas una ficha y ")
+			}
+			fmt.Printf("pasas de turno!")
+			game.firstTurn = wrap(0, len(game.players)-1, game.firstTurn+1)
+			flag = false
+			c := exec.Command("clear")
+			c.Stdout = os.Stdout
+			c.Run()
+		case "salir":
+			return
+		case "jugar":
+			if num >= 0 {
+				fmt.Printf("Jugando ficha: %d", num)
+			}
+		default:
+			fmt.Printf("")
+		}
+	}
+}
+
 func main() {
 	c := exec.Command("clear")
 	c.Stdout = os.Stdout
 	c.Run()
 	game := Init()
 	game.Print()
-	for !game.isEmpty() {
-		var cmd string
-
-		flag := true
-		for flag {
-			fmt.Printf("Es turno del jugador numero %d!\n", game.firstTurn)
-			fmt.Printf("Ingrese su comando (Escribir 'ayuda' para ver lista de comandos): ")
-			fmt.Scan(&cmd)
-			switch cmd {
-			case "ayuda":
-				fmt.Printf(`
-Lista de Comandos:
-	"ayuda"     : Muestra los comandos del juego.
-	"mano"      : Muestra la mano actual.
-	"tablero"   : Muestra el estado actual del tablero.
-	"pasar"     : Si no tienes nada que jugar, puedes  robar una ficha y pasar tu turno.
-	"jugar [i]" : Puedes intentar jugar una ficha de tu mano. El juego determinara donde poner la ficha automaticamente.
-	"salir"     : Salir del juego.
-`)
-			case "mano":
-				for _, v := range game.players[game.firstTurn].Hand {
-					fmt.Printf("\t%v", *v)
-				}
-				fmt.Printf("\n")
-			case "tablero":
-				fmt.Printf("Funcionamiento Pendiente\n")
-			case "pasar":
-				var newFicha *Domino.Domino
-				if !(len(game.shufflePile) == 0) {
-					newFicha, game.shufflePile = Tree.Pop(game.shufflePile)
-					game.players[game.firstTurn].Hand = append(game.players[game.firstTurn].Hand, newFicha)
-				}
-				game.firstTurn = wrap(0, len(game.players)-1, game.firstTurn+1)
-				flag = false
-				c := exec.Command("clear")
-				c.Stdout = os.Stdout
-				c.Run()
-			case "salir":
-				return
-			default:
-				fmt.Printf("Comando no reconocido, intente de nuevo!\n")
-			}
-		}
-	}
+	gameLoop(game)
 }

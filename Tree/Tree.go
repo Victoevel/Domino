@@ -2,6 +2,7 @@ package Tree
 
 import (
 	"Domino/Domino"
+	"Domino/Player"
 	"math/rand"
 	"time"
 )
@@ -37,6 +38,10 @@ func (n *node) append(d *Domino.Domino) bool {
 		return true
 	}
 	return false
+}
+
+func play(player *Player.Player, index int) bool {
+
 }
 
 func compareDominoes(d1, d2 *Domino.Domino) bool {
