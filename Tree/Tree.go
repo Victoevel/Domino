@@ -3,6 +3,7 @@ package Tree
 import (
 	"Domino/Domino"
 	"Domino/Player"
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -10,7 +11,7 @@ import (
 type Tree struct {
 	RightEnd, LeftEnd   int
 	Original            *Domino.Domino
-	RightNode, LeftNode node
+	RightNode, LeftNode *node
 }
 
 type node struct {
@@ -40,8 +41,53 @@ func (n *node) append(d *Domino.Domino) bool {
 	return false
 }
 
-func play(player *Player.Player, index int) bool {
+func Play(player *Player.Player, index int, tree Tree) bool {
+	if index > len(player.Hand) || index < 0 {
+		return false
+	}
+	var nD *Domino.Domino
+	nD, player.Hand = PopIndex(player.Hand, index)
+	if tree.LeftNode == nil {
+		if nD.Dots[0] == 6 || nD.Dots[1] == 6 {
+			tree.LeftNode = &node{value: nD}
+			return true
+		}
+		return false
+	} else if tree.LeftNode == nil {
+		if nD.Dots[0] == 6 || nD.Dots[1] == 6 {
+			tree.RightNode = &node{value: nD}
+			return true
+		}
+		return false
+	}
+	if tree.LeftNode.append(nD) || tree.RightNode.append(nD) {
+		return true
+	} else {
+		player.Hand = append(player.Hand, nD)
+		return false
+	}
+}
 
+func (t *Tree) PrintTree() {
+	fmt.Printf("Original: %v\n", t.Original)
+	fmt.Printf("Left Nodes: \n")
+	currNode := t.LeftNode
+	for {
+		if currNode == nil {
+			break
+		}
+		fmt.Printf("Node: %v\n", currNode)
+		currNode = currNode.nextNode
+	}
+	fmt.Printf("Right Nodes: \n")
+	currNode = t.RightNode
+	for {
+		if currNode == nil {
+			break
+		}
+		fmt.Printf("Node: %v\n", currNode)
+		currNode = currNode.nextNode
+	}
 }
 
 func compareDominoes(d1, d2 *Domino.Domino) bool {

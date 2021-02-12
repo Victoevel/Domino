@@ -139,7 +139,7 @@ Lista de Comandos:
 			}
 			fmt.Printf("\n")
 		case "tablero":
-			fmt.Printf("Funcionamiento Pendiente\n")
+			game.tree.PrintTree()
 		case "pasar":
 			var newFicha *Domino.Domino
 			if !(len(game.shufflePile) == 0) {
@@ -158,6 +158,13 @@ Lista de Comandos:
 		case "jugar":
 			if num >= 0 {
 				fmt.Printf("Jugando ficha: %d", num)
+				if !Tree.Play(game.players[game.firstTurn], num, game.tree) {
+					fmt.Printf("Ficha Invalida!")
+				} else {
+					fmt.Printf("Ficha jugada! Pasando de Turno")
+					game.firstTurn = wrap(0, len(game.players)-1, game.firstTurn+1)
+				}
+
 			}
 		default:
 			fmt.Printf("")
